@@ -1,31 +1,6 @@
 #include "token.h"
 
 
-template <typename T>
-T Token::get_value()
-{
-  switch (type)
-  {
-    case argument:
-    case number:
-      return *(static_cast<func*>(value));
-
-    case operation:
-    case brace:
-      return *(static_cast<char*>(value));
-
-    case function:
-      return *(static_cast<scalar_f*>(value));
-
-    case end:
-      throw Token_error("No value for 'end' type");
-
-    default:
-      throw Token_error("Invalid Token type");
-  }
-}
-
-
 Token Token_stream::get()
 {
   if (!buffer.empty())
@@ -37,11 +12,15 @@ Token Token_stream::get()
 
   char ch;
   if (is)
-    is.get(ch);
+    is.get(ch);    
   else if (is.eof())
-    return Token {end, 0};
+    return Token {end};     
   else
     throw Token_error("Incorrect input");
+
+  for(; isspace(ch) and is; is.get(ch) );
+  if ( is.eof() )
+    return Token {end};
 
   switch (ch)
   {
@@ -75,8 +54,33 @@ Token Token_stream::get()
       double val;
       is >> val;
       return Token {number, func { 
-                        [val](double, double, double) -> double
-                            { return val; } }
+                              [val](double, double, double) -> double
+                              { return val; } 
+                            }
+                   };
+
+    case 'x':
+    case 't':
+      return Token {argument, func {
+                                [](double arg1, double, double) -> double
+                                { return arg1; }
+                              }
+                   };
+
+    case 'y':
+    case 's':
+      return Token {argument, func {
+                                [](double, double arg2, double) -> double
+                                { return arg2; }
+                              }
+                   };
+
+    case 'z':
+    case 'q':
+      return Token {argument, func {
+                                [](double, double, double arg3) -> double
+                                { return arg3; }
+                              }
                    };
 
     default:
