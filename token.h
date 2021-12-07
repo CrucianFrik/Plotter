@@ -76,7 +76,7 @@ public:
   { 
     if (input_string == "")
       throw Token_error("No input");
-    is = isstream{input_string}; 
+    is = isstream{ input_string + " " }; 
   }
 
   Token get();
