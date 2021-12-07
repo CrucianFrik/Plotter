@@ -58,31 +58,7 @@ Token Token_stream::get()
                               { return val; } 
                             }
                    };
-
-    case 'x':
-    case 't':
-      return Token {argument, func {
-                                [](double arg1, double, double) -> double
-                                { return arg1; }
-                              }
-                   };
-
-    case 'y':
-    case 's':
-      return Token {argument, func {
-                                [](double, double arg2, double) -> double
-                                { return arg2; }
-                              }
-                   };
-
-    case 'z':
-    case 'q':
-      return Token {argument, func {
-                                [](double, double, double arg3) -> double
-                                { return arg3; }
-                              }
-                   };
-
+        
     default:
       if (std::isalpha(ch) or ch == '_')
       {
@@ -95,8 +71,45 @@ Token Token_stream::get()
 
         if (scalar_funcs.find(name) != scalar_funcs.end())
           return Token {function, scalar_funcs.at(name)};
+        else
+          for(int i = 0; i < name.size(); i++)
+            is.unget();
+
+        is.get(ch);
+        switch (ch)
+        {
+          case 'x':
+          case 't':
+            return Token {argument, func {
+                                      [](double arg1, double, double) -> double
+                                      { return arg1; }
+                                    }
+                         };
+
+          case 'y':
+          case 's':
+            return Token {argument, func {
+                                      [](double, double arg2, double) -> double
+                                      { return arg2; }
+                                    }
+                         };
+
+          case 'z':
+          case 'q':
+            return Token {argument, func {
+                                      [](double, double, double arg3) -> double
+                                      { return arg3; }
+                                    }
+                         };
+        }
       }
       throw Token_error("Bad token");
   }
 }
+
+
+
+
+
+
 
