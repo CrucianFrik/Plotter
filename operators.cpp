@@ -1,5 +1,7 @@
 #include "operators.h"
 
+func operator+ (func f) { return f; }
+func operator- (func f) { return (-1)*f; }
 
 func operator+ (func f1, func f2)
 {
@@ -44,6 +46,7 @@ func operator*(double d, func f)
   };
 }
 
+func operator*(func f, double d) { return d*f; }
 
 func operator/ (func f1, func f2)
 {

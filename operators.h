@@ -22,11 +22,13 @@ public:
 };
 
 
-
+func operator+ (func f);
+func operator- (func f);
 func operator+ (func f1, func f2);
 func operator- (func f1, func f2);
 func operator* (func f1, func f2);
 func operator* (double d, func f);
+func operator* (func f, double d);
 func operator/ (func f1, func f2);
 func operator^ (func f1, func f2);
 
