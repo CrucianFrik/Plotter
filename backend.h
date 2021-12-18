@@ -1,4 +1,5 @@
 #include <vector>
+#include <cmath>
 
 
 struct MyExeption
@@ -16,6 +17,10 @@ struct Steps
 	double p;  //Шаг между точками на линии
 	double f;  //Шаг для перебора значений третей переменной 
 					//при имеющихся двух для нахождения x3 по f(x1, x2)
+
+	Steps(double ll, double pp, double ff)
+		:l{ll}, p{pp}, f{ff} 
+	{}
 };
 
 const Steps step(1, 1, 1);
@@ -27,7 +32,7 @@ struct ScreenPoint
 
 	ScreenPoint(double x1, double x2)
 		:x{x1}, y{x2} {}
-}
+};
 
 struct Point
 {
@@ -43,8 +48,6 @@ struct Point
 		: x{x1}, y{x2}, z{x3} 
 	{}
 
-	const ScreenPoint* get_projection(/*...*/);
-	{}
 };
 
 
@@ -57,69 +60,136 @@ struct Range
 		: start{s}, end{e}{}
 };
 
+struct function
+{
+	function(){}
+
+	double operator()(Point p)
+	{
+		return pow(p.x, 2) + pow(p.y, 2) + pow(p.z, 2) - 25;
+	}
+
+	double operator()(double x, double y, double z)
+	{
+		return pow(x, 2) + pow(y, 2) + pow(z, 2) - 25;
+	}
+};
+
+class CalcFunction
+{
+private:
+	function F;
+	Range R;
+	double error_rate = step.f/2;
+
+public:
+	CalcFunction(function FF, Range rr)
+		: F{FF}, R{rr} {}
+
+	bool check_point(const Point* p)
+	{
+		if ((p->x && p->y && (!p->z)) || (p->y && p->z && (!p->x)) || (p->x && p->z && (!p->y)))
+			return false;
+		return true;
+	}	
+
+	Point put_to_nan(const Point* p, double arg)
+	{
+		if (!p->x)
+			return Point(arg, p->y, p->z);
+		if (!p->y)
+			return Point(p->x, arg, p->z);
+		if (!p->z)
+			return Point(p->x, p->y, arg);
+	}
+
+	std::vector<double> calc(const Point* p)
+	{
+		if (!check_point(p))
+			throw MyExeption("incorrect Point in CalcFunction.calc");
+
+		std::vector<double> third_coord;
+		for (double arg = R.start; arg < R.end; arg += step.f)
+		{
+			if (F(put_to_nan(p, arg)) <= error_rate)
+				third_coord.push_back(arg);
+		}
+		return third_coord;
+	}		
+	
+};
+
+const ScreenPoint* get_projection(Point p);
 
 class Line
 {
 private:
 	CalcFunction F;
-	Range r;
+	Range R;
 	Point fix_arg;
-	vector<const ScreenPoint const*> line;
+	std::vector<const ScreenPoint *> line;
 
 public:
-	Line(CalcFunction FF, Range rr, Point& fa)
-		: F{FF, rr}, r{rr}, fix_arg{fa} //?? вынести эту красивую строчку за после if?
+	Line(CalcFunction FF, Range rr, Point&& fa)
+		: F{FF}, R{rr}, fix_arg{fa} //?? вынести эту красивую строчку за после if?
 	{ 
-		if (!check_point(fix_arg))
+		if (!check_point(&fix_arg))
 			throw MyExeption("incorrect Point in Line constructor");
 
 		calculate(); 
 	}
 
-	bool check_point(Point* p)
+	bool check_point(const Point* p)
 	{
-		if ((p.x && p.y) || (p.y && p.z) || (p.x && p.z) || (p.x && p.y && p.z))
+		if ((p->x && p->y) || (p->y && p->z) || (p->x && p->z) || (p->x && p->y && p->z))
 			return false;
 		return true;
 	}
 
 	void calculate()
 	{
-		for (double arg = r.start; arg < r.end; arg += step.p)
+		for (double arg = R.start; arg < R.end; arg += step.p)
 		{
-			Point p Point();
+			Point p;
+			std::vector<double> third_coord;
 			if (fix_arg.x)
 			{
 				p.x = fix_arg.x;
 				p.y = arg;
-				p.z = F.calc(p);
+				third_coord = F.calc(&p);
+				for (double tc : third_coord)
+					p.z = tc;
+					line.push_back(get_projection(p));
 			}
 
 			else if (fix_arg.y)
 			{
 				p.y = fix_arg.y;
 				p.z = arg;	
-				p.x = F.calc(p);
+				third_coord = F.calc(&p);
+				for (double tc : third_coord)
+					p.x = tc;
+					line.push_back(get_projection(p));
 			}
 
 			else if (fix_arg.z)
 			{
 				p.z = fix_arg.z;
 				p.x = arg;
-				p.y = F.calc(p);
+				third_coord = F.calc(&p);
+				for (double tc : third_coord)
+					p.y = tc;
+					line.push_back(get_projection(p));
 			}		
-
-			//объекты по указателям лежат в динамической памяти
-			line.push_back(p.get_projection());
 		}
 	}
 
-	const vector<const ScreenPoint const*>& get_line() { return line; }
+	const std::vector<const ScreenPoint*>& get_line() { return line; }
 
 	~Line()
 	{
-		for (int i = 0; i < line.size(); ++i)
-			delete line[i];
+		for (int p = 0; p < line.size(); ++p)
+			delete line[p];
 	}
 };
 
@@ -128,55 +198,31 @@ class Graph
 {
 private:
 	CalcFunction F;
-	Range r;
-	vector <const vector<const ScreenPoint *const> const*> lines;
+	Range R;
+	std::vector <const Line*> graph;
 
 public:
 	Graph(function FF, Range rr)
-		: F{CalcFunction(FF, rr)}, r{rr}
+		: F{CalcFunction(FF, rr)}, R{rr}
 	{
-		for (double x = r.start; x < r.end; x += step.l)
-			lines.push_back(new Line(F, r, Point(x, NAN, NAN)));
+		for (double x = R.start; x < R.end; x += step.l)
+			graph.push_back(new Line(F, R, Point(x, NAN, NAN)));
 
-		for (double y = r.start; y < r.end; y += step.l)
-			lines.push_back(new Line(F, r, Point(NAN, y, NAN)));
+		for (double y = R.start; y < R.end; y += step.l)
+			graph.push_back(new Line(F, R, Point(NAN, y, NAN)));
 
-		for (double z = r.start; z < r.end; z += step.l)
-			lines.push_back(new Line(F, r, Point(NAN, NAN, z)));
+		for (double z = R.start; z < R.end; z += step.l)
+			graph.push_back(new Line(F, R, Point(NAN, NAN, z)));
 	}
 
+	std::vector <const Line*>& get_graph() { return graph; }
+
+	//объекты по указателям лежат в динамической памяти
 	~Graph()
 	{
-		for (int l = 0; l < lines.size(); ++l)
-			delete l;
+		for (int l = 0; l < graph.size(); ++l)
+			delete graph[l];
 	}
 };
 
 
-class CalcFunction
-{
-private:
-	function F;
-	Range r;
-
-public:
-	CalcFunction(function FF, Range rr)
-		: F{FF}, r{rr} {}
-
-	bool check_point(Point* p)
-	{
-		if ((p.x && p.y && (!p.z)) || (p.y && p.z && (!p.x)) || (p.x && p.z && (!p.y)))
-			return false;
-		return true;
-	}	
-
-	double calc(Point* p)
-	{
-		if (!check_point(p))
-			throw MyExeption("incorrect Point in CalcFunction.calc");
-
-		for ... arg += step.f
-		///
-	}		
-	
-};
