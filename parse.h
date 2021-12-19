@@ -1,5 +1,5 @@
-#ifndef PARCE_H
-#define PARCE_H 1
+#ifndef PARSE_H
+#define PARSE_H 1
 
 #include <functional>
 #include <string>
@@ -21,4 +21,4 @@ public:
 
 func get_function(std::string&); 
 
-#endif    // PARCE_H
+#endif    // PARSE_H

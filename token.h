@@ -5,7 +5,7 @@
 #include <sstream>
 #include <unordered_map>
 #include "operators.h"
-#include "parce.h"
+#include "parse.h"
 
 using isstream = std::istringstream;
 
