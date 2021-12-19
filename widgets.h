@@ -61,7 +61,6 @@ namespace Graph_lib
       pw->user_data(this);
       own = &win;
     }
-    static void nthg(Address, Address addr) {};
   };
 };
 

@@ -12,31 +12,32 @@
 using namespace CONSTS;
 using namespace Graph_lib;
 
-struct MODES
+
+struct WidgetSets
 {
   int current_mode = 0;
   
-  Vector_ref <Widget > mode1_wids;
-  Vector_ref <Widget> mode2_wids; 
+  Vector_ref <Widget> mode1;
+  Vector_ref <Widget> mode2; 
   Vector_ref <Vector_ref <Widget>> modes;
 
 
-  MODES()
+  WidgetSets()
   {
-  mode1_wids.push_back(new In_box {Point{X, Y_B - BUTTON_SIZE[1] - SKALE*3},
+  mode1.push_back(new In_box {Point{X, Y_B - BUTTON_SIZE[1] - SKALE*3},
                                   WIN_SIZE.x-2*BUTTON_SIZE[0], BUTTON_SIZE[1], "f (x, y, z):"});
-  mode1_wids.push_back(new TextField {Point{X_L,  Y_B - BUTTON_SIZE[1] - SKALE*3}, 
+  mode1.push_back(new TextField {Point{X_L,  Y_B - BUTTON_SIZE[1] - SKALE*3}, 
                                       BUTTON_SIZE[0], BUTTON_SIZE[1], " = 0"});
 
-  mode2_wids.push_back(new In_box {Point{X, Y_B - 3*(BUTTON_SIZE[1] + SKALE*3)},
+  mode2.push_back(new In_box {Point{X, Y_B - 3*(BUTTON_SIZE[1] + SKALE*3)},
                                   WIN_SIZE.x-2*BUTTON_SIZE[0], BUTTON_SIZE[1], std::string {"x (t, p, q) = "}});
-  mode2_wids.push_back(new In_box {Point{X, Y_B - 2*(BUTTON_SIZE[1] + SKALE*3)},
+  mode2.push_back(new In_box {Point{X, Y_B - 2*(BUTTON_SIZE[1] + SKALE*3)},
                                   WIN_SIZE.x-2*BUTTON_SIZE[0], BUTTON_SIZE[1], std::string {"y (t, p, q) = "}});
-  mode2_wids.push_back(new In_box {Point{X, Y_B - (BUTTON_SIZE[1] + SKALE*3)},
+  mode2.push_back(new In_box {Point{X, Y_B - (BUTTON_SIZE[1] + SKALE*3)},
                                   WIN_SIZE.x-2*BUTTON_SIZE[0], BUTTON_SIZE[1], std::string {"z (t, p, q) = "}});
   
-  modes.push_back(mode1_wids);
-  modes.push_back(mode2_wids);
+  modes.push_back(mode1);
+  modes.push_back(mode2);
   }
 };
 
@@ -51,7 +52,8 @@ private:
   Out_box error_outbox;
   RadioButton mode_1; 
   RadioButton mode_2;
-  MODES m;
+  WidgetSets wid_sets;
+  Screen screen;
 
   static void cb_mode(Address wid, Address win);
   static void cb_enter(Address, Address addr);
