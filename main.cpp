@@ -1,9 +1,9 @@
-#include "GUI_menu.h"
+#include "PlotterWindow.h"
 
 int main()
 {
-	GUI_menu win {Point{100, 100}, CONSTS::WIN_SIZE.x, CONSTS::WIN_SIZE.y, "Canvas"}; 
+    PlotterWindow win {Point{100, 100}, CONSTS::WIN_SIZE.x, CONSTS::WIN_SIZE.y, "Plotter"}; 
 
-  gui_main();
-  return 0;
+    gui_main();
+    return 0;
 }
