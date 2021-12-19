@@ -107,9 +107,3 @@ Token Token_stream::get()
   }
 }
 
-
-
-
-
-
-
