@@ -1,7 +1,7 @@
 #include <iostream>
-#include <functional>
+#define DEBUG_OUT(x) std::cout <<__LINE__<<": "<< (#x) <<" = "<< (x) << std::endl
+
 #include "gui.h"
-#include "parse.h"
 
 
 WidgetSets::WidgetSets()
@@ -31,20 +31,20 @@ PlotterWindow::PlotterWindow (Point xy, int w, int h, const std::string & title)
               BUTTON_SIZE[1], "enter", cb_enter },
 
   mode_1 {Point{X_L, Y_H}, MENU_BUTTON_SIZE[0], MENU_BUTTON_SIZE[1], 
-          "Standart input [F(x, y, z) = 0]", PlotterLib::equation, cb_mode},
+          "Standart input [F(x, y, z) = 0]", ModesNames::equation, cb_mode},
   
   mode_2 {Point{X_L, Y_H + BUTTON_SIZE[1] + SKALE*3}, MENU_BUTTON_SIZE[0], 
           MENU_BUTTON_SIZE[1], "Parametric input [x(t) = 0; y(t) = 0; z(t) = 0]", 
-          PlotterLib::parametric, cb_mode},
+          ModesNames::parametric, cb_mode},
 
   error_outbox {Point {X_L, Y_H + 2*(BUTTON_SIZE[1] + SKALE*3)}, 
                 MENU_BUTTON_SIZE[0], MENU_BUTTON_SIZE[1]*2, ""},
 
-  screen {SCREEN_W, SCREEN_H, SCREEN_SKALE, SCREEN_POINT},
+  screen {},
 
   wid_sets{}
 {
-  wid_sets.current_mode = 0;
+  wid_sets.current_mode = ModesNames::equation;
 
   attach(enter_button);
   attach(mode_1);
@@ -98,15 +98,17 @@ void PlotterWindow::cb_enter(Address, Address addr)
     window.error_outbox.hide();
 
     std::string f_text;
-    if (window.wid_sets.current_mode == PlotterLib::equation)
+    if (window.wid_sets.current_mode == ModesNames::equation)
     {
-      f_text = (static_cast<In_box*> (&window.wid_sets.modes[PlotterLib::equation][0])) -> get_string(); 
-      window.screen.calc_graph(get_function(f_text), RANGE);
+      f_text = (static_cast<In_box*> (&window.wid_sets.modes[ModesNames::equation][0])) -> get_string(); 
+      DEBUG_OUT(f_text);
       window.clear_screen();
+      window.screen.calc_graph(get_function(f_text), RANGE);
       window.draw_screen();
+      DEBUG_OUT("что-то хорошее");
     }
 
-    if (window.wid_sets.current_mode == PlotterLib::parametric)
+    if (window.wid_sets.current_mode == ModesNames::parametric)
     {
       /*...*/
     }
@@ -117,22 +119,37 @@ void PlotterWindow::cb_enter(Address, Address addr)
     window.error_outbox.put("Invalid input!\n" + e.what());
     window.error_outbox.show();
   }
+  catch (...)
+  {
+    window.error_outbox.put("Some error!");
+    window.error_outbox.show(); 
+  }
 }
 
 void PlotterWindow::clear_screen()
 {
-  detach(screen.field);
-  detach_vec(screen.axis);
-  for (int i = 0; i < G.figures.size(); ++i)
-    detach(G.figures[i].line);
+  if (screen.G)
+  {
+    detach(screen.field);
+    detach_vec(screen.axis);
+    std::vector <GraphLine*>& figures = screen.G->get_figures();
+    DEBUG_OUT(screen.G);
+    for (int i = 0; i < figures.size(); ++i)
+      detach(figures[i]->get_curve());
+    Fl::redraw();
+    delete screen.G;
+    screen.G = nullptr;
+  }
 }
 
 void PlotterWindow::draw_screen()
 {
   attach(screen.field);
   attach_vec(screen.axis);
-  for (int i = 0; i < G.figures.size(); ++i)
-    attach(G.figures[i].line);
+  std::vector <GraphLine*>& figures = screen.G->get_figures();
+  for (int i = 0; i < figures.size(); ++i)
+    attach(figures[i]->get_curve());
+  Fl::redraw();
 }
 
 void PlotterWindow::cb_mode(Address wid, Address win) 
@@ -172,18 +189,20 @@ void PlotterWindow::set_mode(Address wid)
   window.wid_sets.current_mode = rb.mode;
 }
 
-Screen::Screen(int ww, int hh, int sk, Graph_lib::Point p);
-    : w{ww}, h{hh}, skale{sk}, pos{p},
-    Rectangle field {pos, w, h}
-{}
+//definition of Screen static data-members
+int Screen::w = SCREEN_W;
+int Screen::h = SCREEN_H;
+int Screen::skale = SCREEN_SKALE;
+Graph_lib::Point Screen::pos = SCREEN_POINT;
 
-const Graph* Screen::calc_graph(func F, Range R)
+void Screen::calc_graph(func F, Range R)
 {
-  axis = Vector_ref <Line>;
-  axis.push_back(Line(get_projection(SpacePoint{0, 0, 0}), get_projection(SpacePoint{R.end, 0, 0})))
-  axis.push_back(Line(get_projection(SpacePoint{0, 0, 0}), get_projection(SpacePoint{0, R.end, 0})))
-  axis.push_back(Line(get_projection(SpacePoint{0, 0, 0}), get_projection(SpacePoint{0, 0, R.end})))
-  const Graph* G = new Graph{CalcFunction {F, R}, R};
+  if (axis.size() == 0)
+  {
+    axis.push_back(new Line(get_projection(SpacePoint{0, 0, 0}), get_projection(SpacePoint{R.end, 0, 0})));
+    axis.push_back(new Line(get_projection(SpacePoint{0, 0, 0}), get_projection(SpacePoint{0, R.end, 0})));
+    axis.push_back(new Line(get_projection(SpacePoint{0, 0, 0}), get_projection(SpacePoint{0, 0, R.end})));
+  }
+  G = new Graph{CalcFunction {F, R}, R};
+  DEBUG_OUT("graph calculated");
 }
-
-

@@ -11,8 +11,6 @@ using Callback = void (*)(Address, Address);
 
 namespace Graph_lib
 {
-  using namespace PlotterLib;
-
   struct RadioButton : Widget 
   {
     ModesNames mode;
@@ -34,13 +32,16 @@ namespace Graph_lib
 
     void attach (Graph_lib::Window& win) override;
     Graph_lib::Window* get_window(){return own;};
+
+    static void nthg(Address, Address addr) {};
   };
 
   struct Curve : Shape 
   {
     using Shape::Shape;
+    Vector_ref<Circle> points;
 
-    void add (Point p)  { Shape::add(p); }
+    void add (Point p)  { points.push_back(new Circle{p, 1}); }
     void draw_lines () const override;
   };
 

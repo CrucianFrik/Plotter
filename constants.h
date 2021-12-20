@@ -1,5 +1,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H 1
+#include "../Graph_lib/Graph.h"
 
 struct Steps
 {
@@ -31,26 +32,25 @@ enum ModesNames
 
 namespace CONSTS
 {
-  using namespace Graph_lib;
-  const int SKALE = 3;
+  const int SKALE = 3;  //!= Screen::scale
   const int INDENT = SKALE*3;
-  const Point WIN_SIZE {1000, 800};
+  const Graph_lib::Point WIN_SIZE {1200, 900};
 
   const std::vector <int> BUTTON_SIZE {SKALE*40, SKALE*12}; 
   const std::vector <int> MENU_BUTTON_SIZE {SKALE*100, SKALE*12}; 
   
-  const int X_R = X + WIN_SIZE.x-int(2.3*BUTTON_SIZE[0]);
   const int X_L = SKALE*30;
+  const int X_R = X_L + WIN_SIZE.x-int(2.3*BUTTON_SIZE[0]);
   const int Y_H = SKALE*20;
   const int Y_B = WIN_SIZE.y-SKALE*20;
   
-  const Point SCREEN_POINT {X+MENU_BUTTON_SIZE[0]+SKALE*3, Y_H};
-  const int SCREEN_SKALE = 1;
-  const int SCREEN_W = WIN_SIZE[0] - X - SCREEN_POINT[0];
-  const int SCREEN_H = WIN_SIZE[1] - INDENT - SCREEN_POINT[1];
+  const Graph_lib::Point SCREEN_POINT {X_L+MENU_BUTTON_SIZE[0]+3*INDENT, Y_H};
+  const int SCREEN_SKALE = 22;
+  const int SCREEN_W = WIN_SIZE.x - X_L - SCREEN_POINT.x;
+  const int SCREEN_H = SCREEN_W;
 
-  const Range RANGE {-10, 10};
-  const Range STEPS Steps{1, 0.1, 0.1};
+  const Range RANGE {-9, 9};
+  const Steps STEP {0.25, 0.05, 0.1};
 };
 
 #endif

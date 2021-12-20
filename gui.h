@@ -2,11 +2,11 @@
 #define GUI_H 1
 
 #include "../Graph_lib/Window.h"
-#include "../Graph_lib/Graph.h"
-#include "space_point.h"
-#include "Graph_lib_additions.h"
 
-using namespace CONSTS;
+#include "Graph_lib_additions.h"
+#include "backend.h"
+#define DEBUG_OUT(x) std::cout <<__LINE__<<": "<< (#x) <<" = "<< (x) << std::endl
+
 using namespace Graph_lib;
 
 struct WidgetSets
@@ -20,8 +20,31 @@ struct WidgetSets
   WidgetSets();
 };
 
+class Screen
+{
+public: //DEBUG: public -> private
+  static int w;
+  static int h;
+  static int skale;
+  static Graph_lib::Point pos;
 
-class PlotterWindow : Graph_lib::Window
+public:
+  Graph* G = nullptr;
+  Graph_lib::Rectangle field;
+  Vector_ref <Line> axis;
+
+  Screen()
+    : field {pos, w, h}
+  {}
+
+  void calc_graph(func F, Range R);
+  static const Graph_lib::Point get_projection(SpacePoint p);
+
+  ~Screen() { delete G; }
+};
+
+
+class PlotterWindow : public Graph_lib::Window
 {
 public:
   PlotterWindow (Point xy, int w, int h, const std::string & title);
@@ -38,31 +61,15 @@ private:
   static void cb_enter(Address, Address addr);
   void set_mode(Address wid);
   void switch_mode(RadioButton& rb, int num, bool turn);
-  void attach_v(Vector_ref <Widget> & v);
+
+  template <typename T>
+  void attach_vec(Vector_ref <T> & v);
+  template <typename T>
+  void detach_vec(Vector_ref <T> & v);
+  void hide_vec(Vector_ref <Widget> & v);
+  
   void draw_screen();
   void clear_screen();
-};
-
-
-
-class Screen
-{
-private:
-  int w;
-  int h;
-  int skale;
-  Graph_lib::Point pos;
-  const Graph* G;
-  Rectangle field;
-  Vector_ref <Line> axis;
-
-public:
-  Screen(int ww, int hh, int sk, Graph_lib::Point p);
-
-  const Graph* calc_graph(func F, Range R);
-  static const Graph_lib::Point get_projection(SpacePoint p);
-
-  ~Screen() { delete G; }
 };
 
 

@@ -21,12 +21,12 @@ Vec3d operator* (double d, const Vec3d v)
   return Vec3d { d*v.x, d*v.y, d*v.z };
 }
 
-Vec3d operator* (const Vec3d, double d)
+Vec3d operator* (const Vec3d v, double d)
 {
   return d*v;
 }
 
-Vec3d operator/ (const Vec3d, double d)
+Vec3d operator/ (const Vec3d v, double d)
 {
   return 1/d * v;
 }

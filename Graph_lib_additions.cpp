@@ -1,5 +1,8 @@
 #include "Graph_lib_additions.h"
 
+namespace Graph_lib
+{
+
 void RadioButton::attach (Graph_lib::Window& win)
 {
   pw = new Fl_Radio_Round_Button{ loc.x, loc.y, width, height, label.c_str() };
@@ -17,19 +20,9 @@ void TextField::attach (Graph_lib::Window& win)
 }
 
 void Curve::draw_lines () const
-    {
-      if (fill_color().visibility())
-      {
-        fl_color (fill_color().as_int());
-        fl_begin_complex_polygon();
-        for(int i = 0; i < number_of_points(); ++i)
-        {
-          fl_point (point(i).x, point(i).y);
-        }
-        fl_end_complex_polygon();
-        fl_color (color().as_int());
-      }
+{
+  for (int i = 0; i < points.size(); ++i)
+    points[i].draw_lines();
+}
 
-      if (color().visibility())
-        Shape::draw_lines();
-    }
+}

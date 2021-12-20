@@ -1,6 +1,8 @@
 #ifndef SPACE_POINT_H
 #define SPACE_POINT_H 1
 
+#include <cmath>
+
 struct SpacePoint
 {
 	double x;
@@ -23,8 +25,12 @@ struct SpacePoint
 
 struct Vec3d
 {
+	double x;
+	double y;
+	double z;
+
   Vec3d (double x_, double y_, double z_)
-    : x {x_}, y {y_}, z {z_}
+    : x {x_}, y {y_}, z {z_} {}
 
   Vec3d (SpacePoint& p)
     : x {p.x}, y {p.y}, z {p.z} {}
